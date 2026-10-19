@@ -82,8 +82,11 @@
       for(let y=0;y<h;y++) for(let x=0;x<w;x++){
         const i=(y*w+x)*4;
         for(let c=0;c<3;c++){
-          const blur=(base[at(Math.max(0,x-1),y,c)]+base[at(Math.min(w-1,x+1),y,c)]+base[at(x,Math.max(0,y-1),c)]+base[at(x,Math.min(h-1,y+1),c)])/4;
-          out[i+c]=Math.max(0,Math.min(255,base[i+c]+(base[i+c]-blur)*amount));
+          const left=base[at(Math.max(0,x-1),y,c)], right=base[at(Math.min(w-1,x+1),y,c)];
+          const up=base[at(x,Math.max(0,y-1),c)], down=base[at(x,Math.min(h-1,y+1),c)];
+          const blur=(left+right+up+down)/4;
+          const edge=base[i+c]-blur;
+          out[i+c]=Math.max(0,Math.min(255,base[i+c]+edge*amount*1.8));
         }
         out[i+3]=input[i+3];
       }
@@ -157,12 +160,15 @@
       ctx.fillStyle='#d85c98';ctx.beginPath();ctx.arc(230,210,95,0,Math.PI*2);ctx.fill();
       ctx.fillStyle='#fff';ctx.fillRect(355,125,220,170);ctx.fillStyle='#7c3159';ctx.font='bold 44px sans-serif';ctx.fillText('BLUR',390,220);
       const temp=document.createElement('canvas');temp.width=w;temp.height=h;temp.getContext('2d').drawImage(c,0,0);
-      ctx.clearRect(0,0,w,h);ctx.filter='blur(5px)';ctx.drawImage(temp,0,0);ctx.filter='none';
+      ctx.clearRect(0,0,w,h);ctx.filter='blur(10px)';ctx.drawImage(temp,0,0);ctx.filter='none';
     } else {
       ctx.fillStyle='#fff';ctx.fillRect(65,55,590,330);ctx.strokeStyle='#bd4e83';ctx.lineWidth=5;ctx.strokeRect(85,75,550,290);
       ctx.fillStyle='#553344';ctx.font='bold 48px sans-serif';ctx.fillText('Clear Pixel',115,170);
       ctx.font='28px sans-serif';ctx.fillText('EDGE / TEXT SAMPLE',115,225);
       ctx.beginPath();ctx.moveTo(115,275);ctx.lineTo(600,275);ctx.stroke();
+      // Deliberately blur the entire rendered sample so the sharpness control has a visible target.
+      const temp=document.createElement('canvas');temp.width=w;temp.height=h;temp.getContext('2d').drawImage(c,0,0);
+      ctx.clearRect(0,0,w,h);ctx.filter='blur(4px)';ctx.drawImage(temp,0,0);ctx.filter='none';
     }
     c.toBlob(blob=>{if(blob)openFile(new File([blob],'clear-pixel-'+kind+'.png',{type:'image/png'}))},'image/png');
   }
