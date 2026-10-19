@@ -170,6 +170,7 @@
 
   $('normalMode').addEventListener('click',()=>{aiMode=false;$('normalMode').classList.add('active');$('aiMode').classList.remove('active');$('aiPanel').hidden=true;status('通常補正モード');render();});
   $('aiMode').addEventListener('click',()=>{aiMode=true;$('aiMode').classList.add('active');$('normalMode').classList.remove('active');$('aiPanel').hidden=false;status('AI補正ラボ');$('aiPanel').scrollIntoView({behavior:'smooth',block:'nearest'});});
+  $('modelPreset').addEventListener('change',e=>{const local=e.target.value==='local';$('modelFileLabel').hidden=!local;if(local)$('onnxModelFile').click();});
   $('onnxModelFile').addEventListener('change',async e=>{
     const file=e.target.files[0]; if(!file)return;
     $('aiStatus').textContent='ONNX Runtimeを初期化中…';$('runAiButton').disabled=true;
