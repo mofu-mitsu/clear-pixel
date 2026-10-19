@@ -116,7 +116,7 @@
     }, 90);
   }
 
-  ids.forEach(id => $(id).addEventListener('input', () => { compareOff=false; $('compareButton').textContent='補正を一時オフ'; render(); }));
+  ids.forEach(id => $(id).addEventListener('input', () => { compareOff=false; $('compareButton').textContent='補正を一時オフ'; updateLabels(); clearTimeout(renderTimer); renderTimer=setTimeout(render, 45); }));
   $('fileInput').addEventListener('change', e => openFile(e.target.files[0]));
   const dz=$('dropzone');
   ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag')}));
@@ -176,7 +176,25 @@
 
   $('normalMode').addEventListener('click',()=>{aiMode=false;$('normalMode').classList.add('active');$('aiMode').classList.remove('active');$('aiPanel').hidden=true;status('通常補正モード');render();});
   $('aiMode').addEventListener('click',()=>{aiMode=true;$('aiMode').classList.add('active');$('normalMode').classList.remove('active');$('aiPanel').hidden=false;status('AI補正ラボ');$('aiPanel').scrollIntoView({behavior:'smooth',block:'nearest'});});
-  $('modelPreset').addEventListener('change',e=>{const local=e.target.value==='local';$('modelFileLabel').hidden=!local;if(local)$('onnxModelFile').click();});
+  $('modelPreset').addEventListener('change',async e=>{
+    const choice=e.target.value;
+    $('modelFileLabel').hidden=choice!=='local';
+    $('runAiButton').disabled=true;
+    if(choice==='local'){$('onnxModelFile').click();return;}
+    if(choice!=='realesrgan')return;
+    $('aiStatus').textContent='Real-ESRGANモデルを取得中… 初回はダウンロードが必要です。';
+    try {
+      if(!window.ort) throw new Error('ONNX Runtime Webの読み込みに失敗しました。ページを再読み込みしてください。');
+      if(ortSession){try{await ortSession.release();}catch(_){} ortSession=null;}
+      const modelUrl='https://huggingface.co/skillsafe-ai/realesrgan-x4plus/resolve/main/model.onnx';
+      ortSession=await ort.InferenceSession.create(modelUrl,{executionProviders:['webgpu','wasm']});
+      $('aiStatus').textContent='Real-ESRGAN x4を読み込みました。画像を選択して「AI補正を実行」を押してください。';
+      $('runAiButton').disabled=!originalData;
+    } catch(err) {
+      ortSession=null;
+      $('aiStatus').textContent='モデル読み込み失敗: '+err.message+'。端末やブラウザの対応状況を確認してください。';
+    }
+  });
   $('onnxModelFile').addEventListener('change',async e=>{
     const file=e.target.files[0]; if(!file)return;
     $('aiStatus').textContent='ONNX Runtimeを初期化中…';$('runAiButton').disabled=true;
@@ -193,24 +211,26 @@
   });
   $('runAiButton').addEventListener('click',async()=>{
     if(!ortSession||!originalData)return;
-    const w=originalCanvas.width,h=originalCanvas.height;
-    $('aiStatus').textContent='AI推論中…';$('runAiButton').disabled=true;
-    try{
-      // Generic image restoration convention: float32 RGB, NCHW, values normalized to 0..1.
-      const rgba=originalData.data, plane=w*h, tensorData=new Float32Array(3*plane);
-      for(let i=0;i<plane;i++){tensorData[i]=rgba[i*4]/255;tensorData[plane+i]=rgba[i*4+1]/255;tensorData[plane*2+i]=rgba[i*4+2]/255;}
-      const inputName=ortSession.inputNames[0];
-      const input=new ort.Tensor('float32',tensorData,[1,3,h,w]);
-      const outputs=await ortSession.run({[inputName]:input});
-      const out=outputs[ortSession.outputNames[0]];
-      if(!out||out.type!=='float32'||out.dims.length!==4||out.dims[0]!==1||out.dims[1]!==3)throw new Error('このモデルの出力形式は未対応です（float32 RGB NCHWを想定）。');
-      const oh=out.dims[2],ow=out.dims[3],od=out.data, rgbaOut=new Uint8ClampedArray(ow*oh*4);
-      for(let i=0;i<ow*oh;i++){rgbaOut[i*4]=Math.max(0,Math.min(255,od[i]*255));rgbaOut[i*4+1]=Math.max(0,Math.min(255,od[ow*oh+i]*255));rgbaOut[i*4+2]=Math.max(0,Math.min(255,od[2*ow*oh+i]*255));rgbaOut[i*4+3]=255;}
-      resultCanvas.width=ow;resultCanvas.height=oh;resultCtx.putImageData(new ImageData(rgbaOut,ow,oh),0,0);
-      $('aiStatus').textContent='推論完了。出力サイズ '+ow+' × '+oh+' px';
+    $('runAiButton').disabled=true;
+    $('aiStatus').textContent='AI補正中…画像サイズによって時間がかかります。';
+    try {
+      const sw=originalCanvas.width, sh=originalCanvas.height;
+      const scale=Math.min(1,256/Math.max(sw,sh));
+      const w=Math.max(1,Math.round(sw*scale)), h=Math.max(1,Math.round(sh*scale));
+      const temp=document.createElement('canvas'); temp.width=w; temp.height=h;
+      const tc=temp.getContext('2d',{willReadFrequently:true}); tc.drawImage(originalCanvas,0,0,w,h);
+      const rgba=tc.getImageData(0,0,w,h).data, plane=w*h, data=new Float32Array(3*plane);
+      for(let i=0;i<plane;i++){data[i]=rgba[i*4]/255;data[plane+i]=rgba[i*4+1]/255;data[2*plane+i]=rgba[i*4+2]/255;}
+      const result=await ortSession.run({[ortSession.inputNames[0]]:new ort.Tensor('float32',data,[1,3,h,w])});
+      const out=result[ortSession.outputNames[0]];
+      if(!out||out.type!=='float32'||out.dims.length!==4||out.dims[0]!==1||out.dims[1]!==3)throw new Error('このモデルの出力形式には未対応です。');
+      const oh=out.dims[2], ow=out.dims[3], od=out.data, pixels=new Uint8ClampedArray(ow*oh*4);
+      for(let i=0;i<ow*oh;i++){pixels[4*i]=Math.round(Math.max(0,Math.min(1,od[i]))*255);pixels[4*i+1]=Math.round(Math.max(0,Math.min(1,od[ow*oh+i]))*255);pixels[4*i+2]=Math.round(Math.max(0,Math.min(1,od[2*ow*oh+i]))*255);pixels[4*i+3]=255;}
+      resultCanvas.width=ow; resultCanvas.height=oh; resultCtx.putImageData(new ImageData(pixels,ow,oh),0,0);
+      $('aiStatus').textContent='AI補正完了：'+ow+' × '+oh+' px。処理負荷を抑えるため入力を縮小しました。';
       status('AI補正を適用しました');
-    }catch(err){$('aiStatus').textContent='推論エラー: '+err.message+'。モデルの入力形状・正規化・出力仕様が異なる可能性があります。';}
-    finally{$('runAiButton').disabled=false;}
+    } catch(err) { $('aiStatus').textContent='推論エラー: '+err.message; }
+    finally { $('runAiButton').disabled=false; }
   });
 
 
