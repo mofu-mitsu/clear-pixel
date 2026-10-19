@@ -49,48 +49,44 @@
     const comp = +$('compression').value / 100;
     const smooth = +$('smooth').value / 100;
     const input = src.data;
-    let base = new Uint8ClampedArray(input);
     const out = new Uint8ClampedArray(input.length);
     const at = (x,y,c) => (y*w+x)*4+c;
 
-    // Cheap separable blur; avoids sorting nine values for every pixel.
-    if (denoise || comp || smooth) {
-      const horizontal = new Uint8ClampedArray(input.length);
-      const vertical = new Uint8ClampedArray(input.length);
-      for (let y=0; y<h; y++) for (let x=0; x<w; x++) {
-        const i=(y*w+x)*4;
-        for(let c=0;c<3;c++){
-          horizontal[i+c]=(input[at(Math.max(0,x-1),y,c)]+2*input[i+c]+input[at(Math.min(w-1,x+1),y,c)])/4;
-        }
-        horizontal[i+3]=input[i+3];
+    // Sharpness uses a 5x5 separable box blur to extract broader edge detail.
+    // Keep this stage independent from denoise/smooth so sharpness=100 is visible even when those are zero.
+    const radius = 2;
+    const horizontal = new Float32Array(input.length);
+    const blurred = new Float32Array(input.length);
+    for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+      const i=(y*w+x)*4;
+      for(let c=0;c<3;c++){
+        let sum=0;
+        for(let dx=-radius;dx<=radius;dx++) sum+=input[at(Math.max(0,Math.min(w-1,x+dx)),y,c)];
+        horizontal[i+c]=sum/(radius*2+1);
       }
-      for (let y=0; y<h; y++) for (let x=0; x<w; x++) {
-        const i=(y*w+x)*4;
-        for(let c=0;c<3;c++){
-          const blur=(horizontal[at(x,Math.max(0,y-1),c)]+2*horizontal[i+c]+horizontal[at(x,Math.min(h-1,y+1),c)])/4;
-          const original=input[i+c];
-          const amount=Math.min(.94, denoise*.88+comp*.72+smooth*.82);
-          vertical[i+c]=original*(1-amount)+blur*amount;
-        }
-        vertical[i+3]=input[i+3];
+      horizontal[i+3]=input[i+3];
+    }
+    for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+      const i=(y*w+x)*4;
+      for(let c=0;c<3;c++){
+        let sum=0;
+        for(let dy=-radius;dy<=radius;dy++) sum+=horizontal[at(x,Math.max(0,Math.min(h-1,y+dy)),c)];
+        blurred[i+c]=sum/(radius*2+1);
       }
-      base=vertical;
-    } else base.set(input);
-
-    if (sharp > 0) {
-      const amount = sharp * 2.8;
-      for(let y=0;y<h;y++) for(let x=0;x<w;x++){
-        const i=(y*w+x)*4;
-        for(let c=0;c<3;c++){
-          const left=base[at(Math.max(0,x-1),y,c)], right=base[at(Math.min(w-1,x+1),y,c)];
-          const up=base[at(x,Math.max(0,y-1),c)], down=base[at(x,Math.min(h-1,y+1),c)];
-          const blur=(left+right+up+down)/4;
-          const edge=base[i+c]-blur;
-          out[i+c]=Math.max(0,Math.min(255,base[i+c]+edge*amount*1.8));
-        }
-        out[i+3]=input[i+3];
+      blurred[i+3]=input[i+3];
+    }
+    const cleanup=Math.min(.72,denoise*.42+comp*.38+smooth*.28);
+    const strength=sharp*3.2;
+    for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+      const i=(y*w+x)*4;
+      for(let c=0;c<3;c++){
+        const original=input[i+c];
+        const cleaned=original*(1-cleanup)+blurred[i+c]*cleanup;
+        const detail=original-blurred[i+c];
+        out[i+c]=Math.max(0,Math.min(255,cleaned+detail*strength));
       }
-    } else out.set(base);
+      out[i+3]=input[i+3];
+    }
     return new ImageData(out,w,h);
   }
 
