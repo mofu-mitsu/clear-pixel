@@ -6,7 +6,7 @@
   const originalCtx = originalCanvas.getContext('2d', {willReadFrequently:true});
   const resultCtx = resultCanvas.getContext('2d');
   const MAX_SIDE = 1600;
-  let originalData = null, sourceFile = null, compareOff = false, renderTimer = 0, renderId = 0, busyTimer = 0;
+  let originalData = null, sourceFile = null, compareOff = false, renderTimer = 0, renderId = 0, busyTimer = 0, aiMode = false;
 
   const bytes = n => n < 1048576 ? Math.round(n/1024)+' KB' : (n/1048576).toFixed(2)+' MB';
   const status = text => $('status').textContent = text;
@@ -27,6 +27,7 @@
       originalData = originalCtx.getImageData(0, 0, w, h);
       $('dropzone').hidden = true;
       $('previewGrid').hidden = false;
+      $('compareSliderWrap').hidden = false;
       $('emptyNote').hidden = true;
       $('fileInfo').hidden = false;
       $('previewActions').hidden = false;
@@ -104,7 +105,8 @@
         const result = processPixels(originalData, originalCanvas.width, originalCanvas.height);
         if (thisRender !== renderId) return;
         resultCtx.putImageData(result,0,0);
-        $('resultCanvas').style.visibility = compareOff ? 'hidden' : 'visible';
+        $('resultCanvas').style.visibility = 'visible';
+        $('resultCanvas').style.opacity = '1';
         $('busy').hidden = true;
         status(compareOff ? '補正を一時オフ' : 'プレビューを更新しました');
       });
@@ -121,7 +123,7 @@
   $('compareButton').addEventListener('click',()=>{
     compareOff=!compareOff;
     $('compareButton').textContent=compareOff?'補正を再表示':'補正を一時オフ';
-    if(compareOff){clearTimeout(renderTimer);$('resultCanvas').style.visibility='hidden';$('busy').hidden=true;status('補正を一時オフ')}
+    if(compareOff){clearTimeout(renderTimer);if(originalData)resultCtx.putImageData(originalData,0,0);$('resultCanvas').style.visibility='visible';$('busy').hidden=true;status('補正を一時オフ（元画像を表示）')}
     else render();
   });
   $('resetButton').addEventListener('click',()=>{ $('sharpness').value=35;$('denoise').value=10;$('compression').value=8;$('smooth').value=0;render(); });
@@ -139,6 +141,36 @@
       status('補正した画像を保存しました');
     },type,type==='image/jpeg'?.94:undefined);
   });
+
+  // Synthetic samples make the effect easy to inspect without uploading a photo.
+  function sampleImage(kind) {
+    const w=720,h=440, c=document.createElement('canvas'); c.width=w;c.height=h;
+    const ctx=c.getContext('2d');
+    ctx.fillStyle='#f8eaf1';ctx.fillRect(0,0,w,h);
+    if(kind==='noise'){
+      ctx.fillStyle='#d8a8c0';ctx.fillRect(55,55,610,330);
+      for(let y=55;y<385;y+=2)for(let x=55;x<665;x+=2){
+        const v=Math.random()*255;ctx.fillStyle='rgba('+Math.round(v)+','+Math.round(v*.75)+','+Math.round(v)+',.55)';ctx.fillRect(x,y,2,2);
+      }
+      ctx.fillStyle='#56364a';ctx.font='bold 38px sans-serif';ctx.fillText('NOISE TEST',180,235);
+    } else if(kind==='blur') {
+      ctx.fillStyle='#d85c98';ctx.beginPath();ctx.arc(230,210,95,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#fff';ctx.fillRect(355,125,220,170);ctx.fillStyle='#7c3159';ctx.font='bold 44px sans-serif';ctx.fillText('BLUR',390,220);
+      const temp=document.createElement('canvas');temp.width=w;temp.height=h;temp.getContext('2d').drawImage(c,0,0);
+      ctx.clearRect(0,0,w,h);ctx.filter='blur(5px)';ctx.drawImage(temp,0,0);ctx.filter='none';
+    } else {
+      ctx.fillStyle='#fff';ctx.fillRect(65,55,590,330);ctx.strokeStyle='#bd4e83';ctx.lineWidth=5;ctx.strokeRect(85,75,550,290);
+      ctx.fillStyle='#553344';ctx.font='bold 48px sans-serif';ctx.fillText('Clear Pixel',115,170);
+      ctx.font='28px sans-serif';ctx.fillText('EDGE / TEXT SAMPLE',115,225);
+      ctx.beginPath();ctx.moveTo(115,275);ctx.lineTo(600,275);ctx.stroke();
+    }
+    c.toBlob(blob=>{if(blob)openFile(new File([blob],'clear-pixel-'+kind+'.png',{type:'image/png'}))},'image/png');
+  }
+  document.querySelectorAll('[data-sample]').forEach(b=>b.addEventListener('click',()=>sampleImage(b.dataset.sample)));
+  $('normalMode').addEventListener('click',()=>{aiMode=false;$('normalMode').classList.add('active');$('aiMode').classList.remove('active');status('通常補正モード')});
+  $('aiMode').addEventListener('click',()=>{aiMode=true;$('aiMode').classList.add('active');$('normalMode').classList.remove('active');status('AI補正は準備中：モデル未接続です');alert('AI補正モードはUIのみの試作です。AIモデルはまだ接続されていないため、画像補正は実行しません。通常補正はそのまま利用できます。')});
+  $('compareSlider').addEventListener('input',e=>{const pct=Number(e.target.value);$('compareValue').textContent=pct+'%';$('originalCanvas').style.opacity=String(pct/100);$('resultCanvas').style.opacity=String(1-pct/100);});
+
   const dialog=$('helpDialog');
   $('helpOpen').addEventListener('click',()=>dialog.showModal());
   $('helpClose').addEventListener('click',()=>dialog.close());
