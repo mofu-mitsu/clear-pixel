@@ -76,7 +76,7 @@
       blurred[i+3]=input[i+3];
     }
     const cleanup=Math.min(.72,denoise*.42+comp*.38+smooth*.28);
-    const strength=sharp*7.0;
+    const strength=sharp*9.0;
     for(let y=0;y<h;y++) for(let x=0;x<w;x++){
       const i=(y*w+x)*4;
       for(let c=0;c<3;c++){
