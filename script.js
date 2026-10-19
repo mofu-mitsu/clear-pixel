@@ -97,11 +97,16 @@
   function render() {
     updateLabels();
     if (!originalData) return;
+    // AI output may be 4x larger; preview canvases must retain the source preview dimensions.
+    if (resultCanvas.width !== originalCanvas.width || resultCanvas.height !== originalCanvas.height) {
+      resultCanvas.width = originalCanvas.width; resultCanvas.height = originalCanvas.height;
+    }
     clearTimeout(renderTimer);
     clearTimeout(busyTimer);
     renderTimer = setTimeout(() => {
       const thisRender = ++renderId;
       $('busy').hidden = false;
+      $('busy').setAttribute('aria-live','polite');
       // Wait until the next frame before CPU work, so rapid slider movement is coalesced.
       requestAnimationFrame(() => {
         if (thisRender !== renderId) return;
@@ -226,7 +231,7 @@
       if(!out||out.type!=='float32'||out.dims.length!==4||out.dims[0]!==1||out.dims[1]!==3)throw new Error('このモデルの出力形式には未対応です。');
       const oh=out.dims[2], ow=out.dims[3], od=out.data, pixels=new Uint8ClampedArray(ow*oh*4);
       for(let i=0;i<ow*oh;i++){pixels[4*i]=Math.round(Math.max(0,Math.min(1,od[i]))*255);pixels[4*i+1]=Math.round(Math.max(0,Math.min(1,od[ow*oh+i]))*255);pixels[4*i+2]=Math.round(Math.max(0,Math.min(1,od[2*ow*oh+i]))*255);pixels[4*i+3]=255;}
-      resultCanvas.width=ow; resultCanvas.height=oh; resultCtx.putImageData(new ImageData(pixels,ow,oh),0,0);
+      const aiCanvas=document.createElement('canvas'); aiCanvas.width=ow; aiCanvas.height=oh; aiCanvas.getContext('2d').putImageData(new ImageData(pixels,ow,oh),0,0); resultCanvas.width=originalCanvas.width; resultCanvas.height=originalCanvas.height; resultCtx.clearRect(0,0,resultCanvas.width,resultCanvas.height); resultCtx.drawImage(aiCanvas,0,0,resultCanvas.width,resultCanvas.height);
       $('aiStatus').textContent='AI補正完了：'+ow+' × '+oh+' px。処理負荷を抑えるため入力を縮小しました。';
       status('AI補正を適用しました');
     } catch(err) { $('aiStatus').textContent='推論エラー: '+err.message; }
