@@ -76,14 +76,17 @@
       blurred[i+3]=input[i+3];
     }
     const cleanup=Math.min(.72,denoise*.42+comp*.38+smooth*.28);
-    const strength=sharp*3.2;
+    const strength=sharp*7.0;
     for(let y=0;y<h;y++) for(let x=0;x<w;x++){
       const i=(y*w+x)*4;
       for(let c=0;c<3;c++){
         const original=input[i+c];
         const cleaned=original*(1-cleanup)+blurred[i+c]*cleanup;
         const detail=original-blurred[i+c];
-        out[i+c]=Math.max(0,Math.min(255,cleaned+detail*strength));
+        // At zero sharpness preserve the input exactly (unless cleanup sliders are active).
+        // Stronger gain makes the deliberately blurred demo visibly respond at high values.
+        const sharpened = cleaned + detail * strength;
+        out[i+c]=Math.max(0,Math.min(255,sharpened));
       }
       out[i+3]=input[i+3];
     }
