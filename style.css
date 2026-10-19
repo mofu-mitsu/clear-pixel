@@ -16,3 +16,15 @@ input[type="range"]{width:100%;min-height:34px;touch-action:pan-y;cursor:pointer
 
 /* Keep loading feedback lightweight and avoid overlay repaint storms */
 #busy{pointer-events:none;contain:content}
+
+/* Seasonal affiliate feature */
+.affiliate-section{margin:8px auto 34px;padding:clamp(20px,4vw,34px);border:1px solid #f0d3e1;border-radius:24px;background:linear-gradient(135deg,#fff7fb 0%,#fff 55%,#fff0f6 100%);box-shadow:0 12px 36px #a34f7410}
+.affiliate-intro{max-width:760px;margin:0 auto 18px;text-align:center}
+.affiliate-kicker{display:inline-block;padding:5px 12px;border-radius:999px;background:#ffe2ef;color:#a33e70;font-size:.76rem;font-weight:850;letter-spacing:.04em}
+.affiliate-intro h2{margin:12px 0 8px;color:#513647;font-size:clamp(1.25rem,3vw,1.8rem);line-height:1.4}
+.affiliate-intro p{margin:7px 0;color:#806879;font-size:.9rem}
+.affiliate-intro .affiliate-product-title{margin-top:17px;color:#a33e70;font-size:1.08rem;font-weight:850}
+.affiliate-intro .affiliate-caption{font-size:.8rem}
+.affiliate-section #msmaflink-71mhr{width:fit-content;max-width:100%;margin:16px auto;padding:12px 22px;border-radius:999px;background:#c65386;color:#fff;text-align:center;font-weight:850}
+.affiliate-section #msmaflink-71mhr a{color:#fff}
+.affiliate-disclosure{margin:16px 0 0;text-align:center;color:#a38d9a;font-size:.7rem}
