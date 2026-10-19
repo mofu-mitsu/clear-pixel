@@ -6,7 +6,7 @@
   const originalCtx = originalCanvas.getContext('2d', {willReadFrequently:true});
   const resultCtx = resultCanvas.getContext('2d');
   const MAX_SIDE = 1600;
-  let originalData = null, sourceFile = null, compareOff = false, renderTimer = 0, renderId = 0, busyTimer = 0, aiMode = false;
+  let originalData = null, sourceFile = null, compareOff = false, renderTimer = 0, renderId = 0, busyTimer = 0, aiMode = false, ortSession = null, ortModelUrl = null;
 
   const bytes = n => n < 1048576 ? Math.round(n/1024)+' KB' : (n/1048576).toFixed(2)+' MB';
   const status = text => $('status').textContent = text;
@@ -167,8 +167,45 @@
     c.toBlob(blob=>{if(blob)openFile(new File([blob],'clear-pixel-'+kind+'.png',{type:'image/png'}))},'image/png');
   }
   document.querySelectorAll('[data-sample]').forEach(b=>b.addEventListener('click',()=>sampleImage(b.dataset.sample)));
-  $('normalMode').addEventListener('click',()=>{aiMode=false;$('normalMode').classList.add('active');$('aiMode').classList.remove('active');status('通常補正モード')});
-  $('aiMode').addEventListener('click',()=>{aiMode=true;$('aiMode').classList.add('active');$('normalMode').classList.remove('active');status('AI補正は準備中：モデル未接続です');alert('AI補正モードはUIのみの試作です。AIモデルはまだ接続されていないため、画像補正は実行しません。通常補正はそのまま利用できます。')});
+
+  $('normalMode').addEventListener('click',()=>{aiMode=false;$('normalMode').classList.add('active');$('aiMode').classList.remove('active');$('aiPanel').hidden=true;status('通常補正モード');render();});
+  $('aiMode').addEventListener('click',()=>{aiMode=true;$('aiMode').classList.add('active');$('normalMode').classList.remove('active');$('aiPanel').hidden=false;status('AI補正ラボ');$('aiPanel').scrollIntoView({behavior:'smooth',block:'nearest'});});
+  $('onnxModelFile').addEventListener('change',async e=>{
+    const file=e.target.files[0]; if(!file)return;
+    $('aiStatus').textContent='ONNX Runtimeを初期化中…';$('runAiButton').disabled=true;
+    try{
+      if(!window.ort) throw new Error('ONNX Runtime Webの読み込みに失敗しました。ネット接続を確認してください。');
+      if(ortSession){try{await ortSession.release()}catch(_){} ortSession=null;}
+      if(ortModelUrl)URL.revokeObjectURL(ortModelUrl);
+      ortModelUrl=URL.createObjectURL(file);
+      ortSession=await ort.InferenceSession.create(ortModelUrl,{executionProviders:['wasm']});
+      const ins=ortSession.inputNames.join(', '), outs=ortSession.outputNames.join(', ');
+      $('aiStatus').textContent='モデル読込成功 · 入力: '+ins+' / 出力: '+outs+'。対応形式を確認して実行できます。';
+      $('runAiButton').disabled=!originalData;
+    }catch(err){ortSession=null;$('aiStatus').textContent='モデル読込エラー: '+err.message;}
+  });
+  $('runAiButton').addEventListener('click',async()=>{
+    if(!ortSession||!originalData)return;
+    const w=originalCanvas.width,h=originalCanvas.height;
+    $('aiStatus').textContent='AI推論中…';$('runAiButton').disabled=true;
+    try{
+      // Generic image restoration convention: float32 RGB, NCHW, values normalized to 0..1.
+      const rgba=originalData.data, plane=w*h, tensorData=new Float32Array(3*plane);
+      for(let i=0;i<plane;i++){tensorData[i]=rgba[i*4]/255;tensorData[plane+i]=rgba[i*4+1]/255;tensorData[plane*2+i]=rgba[i*4+2]/255;}
+      const inputName=ortSession.inputNames[0];
+      const input=new ort.Tensor('float32',tensorData,[1,3,h,w]);
+      const outputs=await ortSession.run({[inputName]:input});
+      const out=outputs[ortSession.outputNames[0]];
+      if(!out||out.type!=='float32'||out.dims.length!==4||out.dims[0]!==1||out.dims[1]!==3)throw new Error('このモデルの出力形式は未対応です（float32 RGB NCHWを想定）。');
+      const oh=out.dims[2],ow=out.dims[3],od=out.data, rgbaOut=new Uint8ClampedArray(ow*oh*4);
+      for(let i=0;i<ow*oh;i++){rgbaOut[i*4]=Math.max(0,Math.min(255,od[i]*255));rgbaOut[i*4+1]=Math.max(0,Math.min(255,od[ow*oh+i]*255));rgbaOut[i*4+2]=Math.max(0,Math.min(255,od[2*ow*oh+i]*255));rgbaOut[i*4+3]=255;}
+      resultCanvas.width=ow;resultCanvas.height=oh;resultCtx.putImageData(new ImageData(rgbaOut,ow,oh),0,0);
+      $('aiStatus').textContent='推論完了。出力サイズ '+ow+' × '+oh+' px';
+      status('AI補正を適用しました');
+    }catch(err){$('aiStatus').textContent='推論エラー: '+err.message+'。モデルの入力形状・正規化・出力仕様が異なる可能性があります。';}
+    finally{$('runAiButton').disabled=false;}
+  });
+
 
   $('compareSlider').addEventListener('input',e=>{
     const pct=Number(e.target.value);
