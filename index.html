@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#fff7fb">\n<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#fff7fb">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>Clear Pixel — 画像を自然に補正</title>
 <meta name="description" content="シャープ化やノイズ軽減を自分で調整できる、ブラウザ内画像補正ツール。">
 <link rel="stylesheet" href="style.css">
@@ -15,17 +16,17 @@
 </header>
 <main class="shell">
   <section class="hero"><div class="eyebrow">SIMPLE IMAGE ENHANCER</div><h1>写真やイラストを、<span>自然にくっきり。</span></h1><p>シャープ化やノイズ軽減を、自分好みに細かく調整。仕上がりを見比べながら、ちょうどいい強さを探せます。</p></section>
-  <section class="workspace" aria-label="画像補正ツール">
+  <section class="mode-strip"><button class="mode-button active" id="normalMode">✧ 通常補正 <small>AIなし</small></button><button class="mode-button" id="aiMode">✦ AI補正モード <small>実験用</small></button></section><section class="sample-panel panel"><h2>サンプルで試す</h2><p>テスト画像を生成して、補正の効き方を確認できます。</p><div class="sample-actions"><button class="sample-chip" data-sample="noise">ざらざらノイズ</button><button class="sample-chip" data-sample="blur">ぼんやり画像</button><button class="sample-chip" data-sample="edge">文字・輪郭</button></div><p class="sample-foot">サンプルはテスト用の合成画像です。</p></section><section class="workspace" aria-label="画像補正ツール">
     <div class="panel preview-panel">
       <div class="panel-head"><h2><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>画像プレビュー</h2><span class="subtle" id="status">画像を選んでスタート</span></div>
       <div class="preview-area">
         <label class="dropzone" id="dropzone" for="fileInput"><span class="upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5M4 15v5h16v-5"/></svg></span><strong>画像をここにドロップ</strong><p>または端末から画像を選択</p><span class="primary">画像を選ぶ</span><input id="fileInput" type="file" accept="image/*" hidden></label>
-        <div class="preview-grid" id="previewGrid" hidden>
+        <div class="compare-slider-wrap" id="compareSliderWrap" hidden><label for="compareSlider">補正前後の比較</label><input id="compareSlider" type="range" min="0" max="100" value="50"><output id="compareValue">50%</output></div><div class="preview-grid" id="previewGrid" hidden>
           <div class="preview-card"><div class="preview-title"><span>補正前</span><span>ORIGINAL</span></div><div class="image-wrap"><canvas id="originalCanvas"></canvas></div></div>
           <div class="preview-card"><div class="preview-title"><span>補正後</span><span>PREVIEW</span></div><div class="image-wrap"><canvas id="resultCanvas"></canvas><div class="busy" id="busy" hidden><span></span>補正中…</div></div></div>
         </div>
         <div class="file-info" id="fileInfo" hidden><span id="dimensions"></span><span id="fileSize"></span></div>
-        <div class="preview-actions" id="previewActions" hidden><button class="secondary" id="changeImage">別の画像を選ぶ</button><button class="secondary" id="compareButton">補正を一時オフ</button></div>
+        <div class="preview-actions" id="previewActions" hidden><button class="secondary" id="changeImage">別の画像を選ぶ</button><button class="secondary" id="compareButton">補正前を表示</button></div>
         <p class="empty-note" id="emptyNote">JPEG・PNG・WebP などに対応</p>
       </div>
     </div>
@@ -47,7 +48,7 @@
   <section class="feature-row"><div class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><b>端末内で処理</b><p>選んだ画像を外部サーバーへ送信しません。</p></div><div class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V14m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6m2-6h6m2 8h6"/></svg></span><b>強さを細かく調整</b><p>自動で顔立ちを作り変えず、仕上がりを自分で決められます。</p></div><div class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/></svg></span><b>シンプルな操作</b><p>画像を選んで、調整して、保存するだけ。</p></div></section>
 </main>
 <footer class="shell">Clear Pixel · シンプル画像補正ツール</footer>
-<dialog id="helpDialog" class="help-dialog"><div class="dialog-head"><h2>Clear Pixel の使い方</h2><button id="helpClose" class="icon-button" aria-label="閉じる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><ol><li>画像を選ぶか、プレビュー欄にドロップします。</li><li>スライダーを少しずつ動かし、補正前後を見比べます。</li><li>好みの仕上がりになったら保存します。</li></ol><h3>補正について</h3><p>シャープ化は輪郭を強調し、ノイズ軽減などは周辺の画素を使ってざらつきを抑えます。ピンぼけそのものの完全な復元はできません。強くしすぎると、輪郭が不自然になったり細部が失われたりすることがあります。</p><h3>画像とプライバシー</h3><p>画像処理はこのブラウザ内で行い、画像をサーバーにアップロードしません。AIモデルや外部AIサービスも使用していません。処理のため、プレビューと保存画像は最大辺1600pxに縮小されます。</p><button class="primary dialog-done" id="helpDone">わかった</button></dialog>
+<dialog id="helpDialog" class="help-dialog"><div class="dialog-head"><h2>Clear Pixel の使い方</h2><button id="helpClose" class="icon-button" aria-label="閉じる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><ol><li>画像を選ぶか、プレビュー欄にドロップします。</li><li>スライダーを少しずつ動かし、補正前後を見比べます。</li><li>好みの仕上がりになったら保存します。</li></ol><h3>補正について</h3><p>シャープ化は輪郭を強調し、ノイズ軽減などは周辺の画素を使ってざらつきを抑えます。ピンぼけそのものの完全な復元はできません。強くしすぎると、輪郭が不自然になったり細部が失われたりすることがあります。</p><h3>画像とプライバシー</h3><p>画像処理はこのブラウザ内で行い、画像をサーバーにアップロードしません。AI補正モードはモデル未接続の実験用UIです。通常補正はAIを使用しません。処理のため、プレビューと保存画像は最大辺1600pxに縮小されます。</p><button class="primary dialog-done" id="helpDone">わかった</button></dialog>
 <script src="script.js" defer></script>
 </body>
 </html>
