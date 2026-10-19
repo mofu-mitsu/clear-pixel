@@ -8,6 +8,15 @@
 <title>Clear Pixel — 画像を自然に補正</title>
 <meta name="description" content="シャープ化やノイズ軽減を自分で調整できる、ブラウザ内画像補正ツール。">
 <link rel="stylesheet" href="style.css">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GNTX973GET"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-GNTX973GET');
+    </script>
 </head>
 <body>
 <header class="shell topbar">
@@ -48,6 +57,20 @@
   <section class="feature-row"><div class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><b>端末内で処理</b><p>選んだ画像を外部サーバーへ送信しません。</p></div><div class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V14m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6m2-6h6m2 8h6"/></svg></span><b>強さを細かく調整</b><p>自動で顔立ちを作り変えず、仕上がりを自分で決められます。</p></div><div class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/></svg></span><b>シンプルな操作</b><p>画像を選んで、調整して、保存するだけ。</p></div></section>
 </main>
 <footer class="shell">Clear Pixel · シンプル画像補正ツール</footer>
+<section class="shell affiliate-section"><h2>おすすめ</h2>
+<!-- START MoshimoAffiliateEasyLink -->
+<script type="text/javascript">
+(function(b,c,f,g,a,d,e){b.MoshimoAffiliateObject=a;
+b[a]=b[a]||function(){arguments.currentScript=c.currentScript
+||c.scripts[c.scripts.length-2];(b[a].q=b[a].q||[]).push(arguments)};
+c.getElementById(a)||(d=c.createElement(f),d.src=g,
+d.id=a,e=c.getElementsByTagName("body")[0],e.appendChild(d))})
+(window,document,"script","//dn.msmstatic.com/site/cardlink/bundle.js?20220329","msmaflink");
+msmaflink({"n":"【ふるさと納税】京都祇園 岩元 冷蔵おせち三段重「匠」約3～4人前 カニ、ロブスター選択可 レビュー高評価［ 京都 祇園 老舗 料亭 完売必至の大人気おせち おすすめ 3人 4人 2027 正月 お祝いお節 京おせち グルメ お取り寄せ 通販 ］","b":"","t":"","d":"https:\/\/thumbnail.image.rakuten.co.jp","c_p":"\/@0_mall\/f261009-kyoto\/cabinet\/frp_goods","p":["\/frp048\/101660801.jpg","\/frp033\/23347876.jpg","\/frp050\/102137153.jpg"],"u":{"u":"https:\/\/item.rakuten.co.jp\/f261009-kyoto\/a-zv001\/","t":"rakuten","r_v":""},"v":"2.1","b_l":[{"id":1,"u_tx":"楽天市場で見る","u_bc":"#f76956","u_url":"https:\/\/item.rakuten.co.jp\/f261009-kyoto\/a-zv001\/","a_id":5854625,"p_id":54,"pl_id":27059,"pc_id":54,"s_n":"rakuten","u_so":1}],"eid":"71mhr","s":"s"});
+</script>
+<div id="msmaflink-71mhr">リンク</div>
+<!-- MoshimoAffiliateEasyLink END -->
+</section>
 <dialog id="helpDialog" class="help-dialog"><div class="dialog-head"><h2>Clear Pixel の使い方</h2><button id="helpClose" class="icon-button" aria-label="閉じる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><ol><li>画像を選ぶか、プレビュー欄にドロップします。</li><li>スライダーを少しずつ動かし、補正前後を見比べます。</li><li>好みの仕上がりになったら保存します。</li></ol><h3>補正について</h3><p>シャープ化は輪郭を強調し、ノイズ軽減などは周辺の画素を使ってざらつきを抑えます。ピンぼけそのものの完全な復元はできません。強くしすぎると、輪郭が不自然になったり細部が失われたりすることがあります。</p><h3>画像とプライバシー</h3><p>画像処理はこのブラウザ内で行い、画像をサーバーにアップロードしません。AI補正モードはONNX Runtime Webを使う実験機能です。モデルを自分で読み込む場合、モデルの形式が対応している必要があります。通常補正はAIを使用しません。処理のため、プレビューと保存画像は最大辺1600pxに縮小されます。</p><button class="primary dialog-done" id="helpDone">わかった</button></dialog>
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/ort.min.js" defer></script>
 <script src="script.js" defer></script>
