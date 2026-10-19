@@ -11,3 +11,5 @@
 
 /* Larger touch target for range controls, especially sharpness on mobile */
 input[type="range"]{touch-action:pan-y;cursor:pointer;min-height:28px}input[type="range"]::-webkit-slider-thumb{width:22px;height:22px;cursor:grab}input[type="range"]::-webkit-slider-thumb:active{cursor:grabbing}input[type="range"]::-moz-range-thumb{width:22px;height:22px;cursor:grab}
+
+input[type="range"]{width:100%;min-height:34px;touch-action:pan-y;cursor:pointer;accent-color:#bf5687}input[type="range"]::-webkit-slider-thumb{width:26px;height:26px;cursor:grab}input[type="range"]::-webkit-slider-thumb:active{cursor:grabbing}input[type="range"]::-moz-range-thumb{width:26px;height:26px;cursor:grab}@media(max-width:600px){.ai-load-row{align-items:stretch;flex-direction:column}.ai-load-row .select{width:100%}.ai-load-row .primary,.ai-file-label{width:100%;text-align:center}}
