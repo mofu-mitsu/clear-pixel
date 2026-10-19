@@ -3,205 +3,51 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#fff4f8">
-<title>Clear Pixel — AIを使わず、自然にくっきり。</title>
-<meta name="description" content="画像をアップロードして、シャープ化・ノイズ軽減・圧縮劣化の軽減をブラウザ内で調整。画像は外部へ送信されません。">
-<style>
-:root{color-scheme:light;--ink:#443541;--muted:#897783;--pink:#e987b0;--pink-dark:#bf5687;--pink-pale:#fff0f6;--line:#f0dce6;--white:#fff;--shadow:0 12px 36px #a34f7410}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#fff8fb 0,#fff 380px);color:var(--ink);font-family:ui-rounded,"Hiragino Maru Gothic ProN","Hiragino Sans",Meiryo,system-ui,sans-serif;line-height:1.65}
-button,input,select{font:inherit}button{cursor:pointer}.shell{width:min(1100px,calc(100% - 32px));margin:auto}.topbar{padding:22px 0 14px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:11px;font-weight:850;font-size:1.16rem;letter-spacing:.01em}.logo{width:42px;height:42px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,#ffd8e9,#f5a9ca);color:#8e3d67;font-size:22px;box-shadow:0 5px 15px #e987b033}.local-badge{font-size:.78rem;color:#8b6378;background:#fff0f6;border:1px solid #f4d8e5;border-radius:999px;padding:7px 11px;white-space:nowrap}
-.hero{text-align:center;padding:42px 0 30px}.eyebrow{color:var(--pink-dark);font-weight:800;font-size:.8rem;letter-spacing:.13em}.hero h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.25;letter-spacing:-.045em;margin:12px 0}.hero h1 span{color:var(--pink-dark)}.hero p{max-width:590px;margin:0 auto;color:var(--muted);font-size:.98rem}
-.workspace{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(270px,.8fr);gap:20px;align-items:start;padding-bottom:48px}.panel{background:#fff;border:1px solid var(--line);border-radius:23px;box-shadow:var(--shadow);overflow:hidden}.panel-head{padding:18px 21px;border-bottom:1px solid #f5e8ee;display:flex;align-items:center;justify-content:space-between;gap:12px}.panel-head h2{margin:0;font-size:1rem}.subtle{color:var(--muted);font-size:.8rem}.preview-area{padding:18px}.dropzone{border:1.5px dashed #e9b7ce;border-radius:18px;background:#fff8fb;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;transition:.2s;cursor:pointer}.dropzone.drag{background:#ffeaf3;border-color:var(--pink-dark)}.upload-icon{width:53px;height:53px;border-radius:18px;display:grid;place-items:center;background:#ffe5f0;color:#b94e80;font-size:25px;margin-bottom:12px}.dropzone strong{font-size:1rem}.dropzone p{margin:5px 0 14px;color:var(--muted);font-size:.83rem}.primary,.secondary{border:0;border-radius:12px;padding:10px 16px;font-weight:800;transition:transform .15s,filter .15s}.primary{background:linear-gradient(135deg,#e987b0,#d86c9d);color:#fff;box-shadow:0 5px 14px #df76a52c}.secondary{background:#fff0f6;color:#a34875;border:1px solid #f1d6e3}.primary:hover,.secondary:hover{filter:brightness(.98);transform:translateY(-1px)}.preview-grid{display:none;grid-template-columns:1fr 1fr;gap:12px}.preview-card{min-width:0;border:1px solid #f0e1e8;border-radius:15px;overflow:hidden;background:#fcfafb}.preview-title{padding:9px 12px;display:flex;justify-content:space-between;gap:8px;font-size:.82rem;font-weight:800;background:#fff}.preview-title span:last-child{font-size:.72rem;color:var(--muted);font-weight:500}.image-wrap{height:320px;display:grid;place-items:center;background-color:#f7f2f5;background-image:linear-gradient(45deg,#eae3e8 25%,transparent 25%),linear-gradient(-45deg,#eae3e8 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eae3e8 75%),linear-gradient(-45deg,transparent 75%,#eae3e8 75%);background-size:18px 18px;background-position:0 0,0 9px,9px -9px,-9px 0;overflow:hidden}.image-wrap canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}.file-info{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;margin-top:12px;color:var(--muted);font-size:.78rem}.preview-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}.preview-actions button{flex:1}
-.controls{padding:20px}.control-intro{font-size:.84rem;color:var(--muted);margin:0 0 18px}.control{padding:15px 0;border-bottom:1px solid #f4e7ed}.control:first-of-type{padding-top:0}.control:last-of-type{border-bottom:0}.control-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:7px}.control label{font-weight:800;font-size:.9rem}.value{font-size:.82rem;color:var(--pink-dark);font-weight:850;background:#fff0f6;padding:3px 8px;border-radius:8px;min-width:47px;text-align:center}.control small{display:block;color:var(--muted);font-size:.77rem;margin-top:5px}.range{width:100%;accent-color:var(--pink-dark);cursor:pointer}.range-ends{display:flex;justify-content:space-between;font-size:.7rem;color:#a08b98}.divider-label{margin:18px 0 9px;font-size:.76rem;letter-spacing:.07em;color:#a1778d;font-weight:850}.select{width:100%;padding:10px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink)}.download{width:100%;margin-top:17px;padding:13px}.reset{width:100%;margin-top:8px}.notice{font-size:.75rem;color:var(--muted);margin:13px 0 0}.empty-note{text-align:center;color:var(--muted);font-size:.84rem;padding:12px 0 0}.feature-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 0 42px}.feature{border:1px solid var(--line);border-radius:16px;background:#fff;padding:16px}.feature b{display:block;font-size:.88rem;margin-bottom:4px}.feature p{margin:0;color:var(--muted);font-size:.78rem}.feature-icon{font-size:1.3rem;margin-bottom:7px}footer{text-align:center;color:#a38d9a;font-size:.76rem;padding:20px 0 30px;border-top:1px solid #f5e8ee}
-@media(max-width:780px){.workspace{grid-template-columns:1fr}.controls{padding:18px}.hero{padding:30px 0 24px}.image-wrap{height:260px}.feature-row{grid-template-columns:1fr}.topbar{align-items:flex-start}.local-badge{font-size:.7rem}}
-@media(max-width:480px){.shell{width:min(100% - 22px,1100px)}.preview-grid{grid-template-columns:1fr}.image-wrap{height:300px}.hero h1{font-size:2.15rem}.hero p{font-size:.9rem}.panel-head{padding:15px}.preview-area{padding:12px}}
-</style>
+<meta name="theme-color" content="#fff7fb">
+<title>Clear Pixel — 画像を自然に補正</title>
+<meta name="description" content="シャープ化やノイズ軽減を自分で調整できる、ブラウザ内画像補正ツール。">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="shell topbar">
-  <div class="brand"><div class="logo" aria-hidden="true">✧</div><span>Clear Pixel</span></div>
-  <div class="local-badge">🔒 画像は端末内で処理</div>
+  <a class="brand" href="./" aria-label="Clear Pixel ホーム"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 29 17 45 24 29 29 24 45 18 29 3 24 18 17Z" fill="currentColor"/><circle cx="36" cy="9" r="3" fill="#fff"/></svg><span>Clear Pixel</span></a>
+  <button class="help-button" id="helpOpen" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.7 9a2.4 2.4 0 1 1 4.2 1.6c-1.1 1-1.9 1.2-1.9 2.8M12 17h.01"/></svg>使い方</button>
 </header>
 <main class="shell">
-  <section class="hero">
-    <div class="eyebrow">SIMPLE IMAGE ENHANCER</div>
-    <h1>AIを使わず、<span>自然にくっきり。</span></h1>
-    <p>ぼんやりした写真やイラストを、自分好みの仕上がりに。顔立ちを勝手に作り変えず、シャープ化やノイズ軽減を細かく調整できます。</p>
-  </section>
+  <section class="hero"><div class="eyebrow">SIMPLE IMAGE ENHANCER</div><h1>写真やイラストを、<span>自然にくっきり。</span></h1><p>シャープ化やノイズ軽減を、自分好みに細かく調整。仕上がりを見比べながら、ちょうどいい強さを探せます。</p></section>
   <section class="workspace" aria-label="画像補正ツール">
-    <div class="panel">
-      <div class="panel-head"><h2>🖼️ 画像プレビュー</h2><span class="subtle" id="status">画像を選んでスタート</span></div>
+    <div class="panel preview-panel">
+      <div class="panel-head"><h2><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>画像プレビュー</h2><span class="subtle" id="status">画像を選んでスタート</span></div>
       <div class="preview-area">
-        <label class="dropzone" id="dropzone" for="fileInput">
-          <div class="upload-icon">↑</div><strong>画像をここにドロップ</strong><p>または、端末から画像を選択してください</p><span class="primary">画像を選ぶ</span>
-          <input id="fileInput" type="file" accept="image/*" hidden>
-        </label>
-        <div class="preview-grid" id="previewGrid">
+        <label class="dropzone" id="dropzone" for="fileInput"><span class="upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5M4 15v5h16v-5"/></svg></span><strong>画像をここにドロップ</strong><p>または端末から画像を選択</p><span class="primary">画像を選ぶ</span><input id="fileInput" type="file" accept="image/*" hidden></label>
+        <div class="preview-grid" id="previewGrid" hidden>
           <div class="preview-card"><div class="preview-title"><span>補正前</span><span>ORIGINAL</span></div><div class="image-wrap"><canvas id="originalCanvas"></canvas></div></div>
-          <div class="preview-card"><div class="preview-title"><span>補正後</span><span>PREVIEW</span></div><div class="image-wrap"><canvas id="resultCanvas"></canvas></div></div>
+          <div class="preview-card"><div class="preview-title"><span>補正後</span><span>PREVIEW</span></div><div class="image-wrap"><canvas id="resultCanvas"></canvas><div class="busy" id="busy" hidden><span></span>補正中…</div></div></div>
         </div>
         <div class="file-info" id="fileInfo" hidden><span id="dimensions"></span><span id="fileSize"></span></div>
         <div class="preview-actions" id="previewActions" hidden><button class="secondary" id="changeImage">別の画像を選ぶ</button><button class="secondary" id="compareButton">補正を一時オフ</button></div>
-        <p class="empty-note" id="emptyNote">対応形式：JPEG・PNG・WebP など</p>
+        <p class="empty-note" id="emptyNote">JPEG・PNG・WebP などに対応</p>
       </div>
     </div>
     <aside class="panel">
-      <div class="panel-head"><h2>🎛️ 補正の調整</h2><span class="subtle">リアルタイム</span></div>
+      <div class="panel-head"><h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V14M4 10V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6m2-6h6m2 8h6"/></svg>補正の調整</h2><span class="subtle">プレビュー</span></div>
       <div class="controls">
         <p class="control-intro">スライダーを動かして、自然に見える強さを探してね。</p>
-        <div class="control">
-          <div class="control-top"><label for="sharpness">✨ シャープ化</label><output class="value" id="sharpnessValue">35%</output></div>
-          <input class="range" id="sharpness" type="range" min="0" max="100" value="35"><div class="range-ends"><span>やわらか</span><span>くっきり</span></div><small>輪郭や細部を強調して、ぼんやり感を軽減します。</small>
-        </div>
-        <div class="control">
-          <div class="control-top"><label for="denoise">☁️ ノイズ軽減</label><output class="value" id="denoiseValue">10%</output></div>
-          <input class="range" id="denoise" type="range" min="0" max="100" value="10"><div class="range-ends"><span>そのまま</span><span>なめらか</span></div><small>写真のざらつきを抑えます。強くしすぎると細部も薄くなります。</small>
-        </div>
-        <div class="control">
-          <div class="control-top"><label for="compression">🫧 圧縮ノイズ軽減</label><output class="value" id="compressionValue">8%</output></div>
-          <input class="range" id="compression" type="range" min="0" max="100" value="8"><div class="range-ends"><span>そのまま</span><span>強め</span></div><small>JPEG画像などのざらつき・細かなブロック感を目立ちにくくします。</small>
-        </div>
-        <div class="control">
-          <div class="control-top"><label for="smooth">🌸 なめらか補正</label><output class="value" id="smoothValue">0%</output></div>
-          <input class="range" id="smooth" type="range" min="0" max="100" value="0"><div class="range-ends"><span>オフ</span><span>なめらか</span></div><small>肌専用ではなく画像全体にかかる、ごく軽い質感調整です。</small>
-        </div>
-        <div class="divider-label">SAVE SETTINGS</div>
-        <label for="format" class="subtle">保存形式</label>
-        <select class="select" id="format"><option value="image/png">PNG（画質優先・ファイル大きめ）</option><option value="image/jpeg">JPEG（ファイル小さめ）</option></select>
-        <button class="primary download" id="downloadButton" disabled>↓ 補正した画像を保存</button>
+        <div class="control"><div class="control-top"><label for="sharpness">シャープ化</label><output class="value" id="sharpnessValue">35%</output></div><input class="range" id="sharpness" type="range" min="0" max="100" value="35"><div class="range-ends"><span>やわらか</span><span>くっきり</span></div><small>輪郭を強調して、ぼんやり感を軽減します。</small></div>
+        <div class="control"><div class="control-top"><label for="denoise">ノイズ軽減</label><output class="value" id="denoiseValue">10%</output></div><input class="range" id="denoise" type="range" min="0" max="100" value="10"><div class="range-ends"><span>そのまま</span><span>なめらか</span></div><small>写真のざらつきを抑えます。強すぎると細部も薄くなります。</small></div>
+        <div class="control"><div class="control-top"><label for="compression">圧縮ノイズ軽減</label><output class="value" id="compressionValue">8%</output></div><input class="range" id="compression" type="range" min="0" max="100" value="8"><div class="range-ends"><span>そのまま</span><span>強め</span></div><small>JPEGなどの細かなブロック感を目立ちにくくします。</small></div>
+        <div class="control"><div class="control-top"><label for="smooth">なめらか補正</label><output class="value" id="smoothValue">0%</output></div><input class="range" id="smooth" type="range" min="0" max="100" value="0"><div class="range-ends"><span>オフ</span><span>なめらか</span></div><small>画像全体にかかる、ごく軽い質感調整です。</small></div>
+        <div class="save-title">保存設定</div><label for="format" class="subtle format-label">保存形式</label><select class="select" id="format"><option value="image/png">PNG（画質優先）</option><option value="image/jpeg">JPEG（ファイル小さめ）</option></select>
+        <button class="primary download" id="downloadButton" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg>補正した画像を保存</button>
         <button class="secondary reset" id="resetButton" disabled>設定をリセット</button>
-        <p class="notice">画像はサーバーに送信されません。元画像を変更せず、補正結果を別ファイルとして保存します。</p>
+        <p class="notice">元画像は変更せず、補正結果を別ファイルとして保存します。</p>
       </div>
     </aside>
   </section>
-  <section class="feature-row" aria-label="特徴">
-    <div class="feature"><div class="feature-icon">🔒</div><b>画像は端末内だけで処理</b><p>アップロード不要。画像データを外部サーバーへ送信しません。</p></div>
-    <div class="feature"><div class="feature-icon">🎚️</div><b>補正の強さを自分で調整</b><p>自動で顔を作り変えず、処理の加減を自分で決められます。</p></div>
-    <div class="feature"><div class="feature-icon">🌷</div><b>シンプルで使いやすい</b><p>画像を選び、調整して、保存するだけ。</p></div>
-  </section>
+  <section class="feature-row"><div class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><b>端末内で処理</b><p>選んだ画像を外部サーバーへ送信しません。</p></div><div class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V14m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6m2-6h6m2 8h6"/></svg></span><b>強さを細かく調整</b><p>自動で顔立ちを作り変えず、仕上がりを自分で決められます。</p></div><div class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/></svg></span><b>シンプルな操作</b><p>画像を選んで、調整して、保存するだけ。</p></div></section>
 </main>
-<footer class="shell">Clear Pixel · AIを使わない、ブラウザ内画像補正ツール</footer>
-<script>
-(() => {
-  const $ = id => document.getElementById(id);
-  const fileInput=$('fileInput'), dropzone=$('dropzone'), previewGrid=$('previewGrid');
-  const originalCanvas=$('originalCanvas'), resultCanvas=$('resultCanvas');
-  const originalCtx=originalCanvas.getContext('2d',{willReadFrequently:true});
-  const resultCtx=resultCanvas.getContext('2d');
-  const sliders=['sharpness','denoise','compression','smooth'];
-  let sourceImage=null, sourceFile=null, originalData=null, compareOff=false, renderToken=0;
-  const MAX_SIDE=1800;
-  const fmtBytes=n=>n<1024*1024?(n/1024).toFixed(0)+' KB':(n/1024/1024).toFixed(2)+' MB';
-  function setStatus(s){$('status').textContent=s}
-  function updateValues(){sliders.forEach(id=>$(id+'Value').textContent=$(id).value+'%')}
-  function resetControls(){ $('sharpness').value=35;$('denoise').value=10;$('compression').value=8;$('smooth').value=0;updateValues();render()}
-  function openFile(file){
-    if(!file)return;
-    if(!file.type.startsWith('image/')){setStatus('画像ファイルを選んでね');return}
-    const url=URL.createObjectURL(file), img=new Image();
-    img.onload=()=>{
-      sourceImage=img;sourceFile=file;compareOff=false;
-      const scale=Math.min(1,MAX_SIDE/Math.max(img.naturalWidth,img.naturalHeight));
-      const w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
-      originalCanvas.width=resultCanvas.width=w;originalCanvas.height=resultCanvas.height=h;
-      originalCtx.clearRect(0,0,w,h);originalCtx.drawImage(img,0,0,w,h);
-      originalData=originalCtx.getImageData(0,0,w,h);
-      dropzone.style.display='none';previewGrid.style.display='grid';$('emptyNote').hidden=true;
-      $('fileInfo').hidden=false;$('previewActions').hidden=false;
-      $('dimensions').textContent=img.naturalWidth+' × '+img.naturalHeight+' px'+(scale<1?'（プレビュー処理用に縮小）':'');
-      $('fileSize').textContent=file.name+' · '+fmtBytes(file.size);
-      $('downloadButton').disabled=false;$('resetButton').disabled=false;
-      setStatus('画像を読み込みました');URL.revokeObjectURL(url);render();
-    };
-    img.onerror=()=>{setStatus('この画像は読み込めませんでした');URL.revokeObjectURL(url)};
-    img.src=url;
-  }
-  function clamp(v){return Math.max(0,Math.min(255,v))}
-  function processPixels(src,w,h){
-    const sharp=+$('sharpness').value/100, denoise=+$('denoise').value/100, comp=+$('compression').value/100, smooth=+$('smooth').value/100;
-    const data=new Uint8ClampedArray(src.data), out=new Uint8ClampedArray(src.data.length);
-    const idx=(x,y,c)=>(y*w+x)*4+c;
-    // Mild edge-aware approximation: mix a 3x3 median-like neighborhood with the source.
-    // Keep processing deterministic and entirely local; no ML/model inference.
-    if(denoise>0||comp>0||smooth>0){
-      for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-        const i=(y*w+x)*4;
-        for(let c=0;c<3;c++){
-          const vals=[];
-          for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
-            const xx=Math.max(0,Math.min(w-1,x+dx)),yy=Math.max(0,Math.min(h-1,y+dy));
-            vals.push(src.data[idx(xx,yy,c)]);
-          }
-          vals.sort((a,b)=>a-b);
-          const median=vals[4], avg=vals.reduce((a,b)=>a+b,0)/vals.length;
-          const strength=Math.min(.78,denoise*.48+comp*.24+smooth*.42);
-          // Blend toward median for speckle noise and toward average for compression/smoothing.
-          const medianMix=Math.min(.72,denoise*.56+comp*.18);
-          const avgMix=Math.min(.5,comp*.26+smooth*.34);
-          let v=src.data[i+c]*(1-strength)+median*medianMix+avg*avgMix;
-          const total=1-strength+medianMix+avgMix;
-          out[i+c]=clamp(v/total);
-        }
-        out[i+3]=src.data[i+3];
-      }
-    }else out.set(src.data);
-    // Unsharp mask: original minus a compact box-blur approximation.
-    if(sharp>0){
-      const amount=sharp*1.35;
-      const base=new Uint8ClampedArray(out);
-      for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
-        const i=(y*w+x)*4;
-        for(let c=0;c<3;c++){
-          const blur=(base[idx(x-1,y-1,c)]+base[idx(x,y-1,c)]+base[idx(x+1,y-1,c)]+base[idx(x-1,y,c)]+base[idx(x,y,c)]+base[idx(x+1,y,c)]+base[idx(x-1,y+1,c)]+base[idx(x,y+1,c)]+base[idx(x+1,y+1,c)])/9;
-          out[i+c]=clamp(base[i+c]+(base[i+c]-blur)*amount);
-        }
-      }
-    }
-    return new ImageData(out,w,h);
-  }
-  function render(){
-    updateValues();
-    if(!originalData)return;
-    const token=++renderToken;
-    // Yield one frame so the controls remain responsive while processing.
-    requestAnimationFrame(()=>{
-      if(token!==renderToken)return;
-      const result=processPixels(originalData,originalCanvas.width,originalCanvas.height);
-      if(token!==renderToken)return;
-      resultCtx.putImageData(result,0,0);
-      resultCanvas.style.opacity=compareOff?'0.28':'1';
-      setStatus(compareOff?'補正を一時オフ':'補正プレビュー');
-    });
-  }
-  sliders.forEach(id=>$(id).addEventListener('input',render));
-  fileInput.addEventListener('change',e=>openFile(e.target.files[0]));
-  ['dragenter','dragover'].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.add('drag')}));
-  ['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.remove('drag')}));
-  dropzone.addEventListener('drop',e=>openFile(e.dataTransfer.files[0]));
-  $('changeImage').addEventListener('click',()=>fileInput.click());
-  $('compareButton').addEventListener('click',()=>{
-    compareOff=!compareOff;
-    if(compareOff){resultCtx.putImageData(originalData,0,0);$('compareButton').textContent='補正を再表示';setStatus('補正を一時オフ')}
-    else{$('compareButton').textContent='補正を一時オフ';render()}
-  });
-  $('resetButton').addEventListener('click',resetControls);
-  $('downloadButton').addEventListener('click',()=>{
-    if(!originalData)return;
-    // Re-render at the current settings before export, including when preview was toggled off.
-    const data=processPixels(originalData,originalCanvas.width,originalCanvas.height);
-    const c=document.createElement('canvas');c.width=originalCanvas.width;c.height=originalCanvas.height;
-    c.getContext('2d').putImageData(data,0,0);
-    const type=$('format').value;
-    c.toBlob(blob=>{
-      if(!blob){setStatus('保存に失敗しました');return}
-      const a=document.createElement('a'),url=URL.createObjectURL(blob);
-      const base=(sourceFile?.name||'clear-pixel-image').replace(/\.[^.]+$/,'');
-      a.href=url;a.download=base+'-clear-pixel.'+(type==='image/jpeg'?'jpg':'png');
-      document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-      setStatus('補正した画像を保存しました');
-    },type,type==='image/jpeg'?.94:undefined);
-  });
-})();
-</script>
+<footer class="shell">Clear Pixel · シンプル画像補正ツール</footer>
+<dialog id="helpDialog" class="help-dialog"><div class="dialog-head"><h2>Clear Pixel の使い方</h2><button id="helpClose" class="icon-button" aria-label="閉じる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><ol><li>画像を選ぶか、プレビュー欄にドロップします。</li><li>スライダーを少しずつ動かし、補正前後を見比べます。</li><li>好みの仕上がりになったら保存します。</li></ol><h3>補正について</h3><p>シャープ化は輪郭を強調し、ノイズ軽減などは周辺の画素を使ってざらつきを抑えます。ピンぼけそのものの完全な復元はできません。強くしすぎると、輪郭が不自然になったり細部が失われたりすることがあります。</p><h3>画像とプライバシー</h3><p>画像処理はこのブラウザ内で行い、画像をサーバーにアップロードしません。AIモデルや外部AIサービスも使用していません。処理のため、プレビューと保存画像は最大辺1600pxに縮小されます。</p><button class="primary dialog-done" id="helpDone">わかった</button></dialog>
+<script src="script.js" defer></script>
 </body>
 </html>
