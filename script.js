@@ -34,7 +34,7 @@
       $('dimensions').textContent = img.naturalWidth+' × '+img.naturalHeight+' px'+(scale<1?'（最大辺1600pxに縮小）':'');
       $('fileSize').textContent = file.name+' · '+bytes(file.size);
       $('downloadButton').disabled = $('resetButton').disabled = false;
-      compareOff = false; $('compareButton').textContent = '補正を一時オフ';
+      compareOff = false; $('compareButton').textContent = '補正を一時オフ'; $('originalCanvas').style.opacity='1'; $('originalCanvas').style.clipPath='none'; $('resultCanvas').style.opacity='1'; $('compareSlider').value=50; $('compareValue').textContent='50% 補正前';
       status('画像を読み込みました');
       URL.revokeObjectURL(url);
       render();
@@ -69,7 +69,7 @@
         for(let c=0;c<3;c++){
           const blur=(horizontal[at(x,Math.max(0,y-1),c)]+2*horizontal[i+c]+horizontal[at(x,Math.min(h-1,y+1),c)])/4;
           const original=input[i+c];
-          const amount=Math.min(.78, denoise*.5+comp*.3+smooth*.48);
+          const amount=Math.min(.94, denoise*.88+comp*.72+smooth*.82);
           vertical[i+c]=original*(1-amount)+blur*amount;
         }
         vertical[i+3]=input[i+3];
@@ -78,7 +78,7 @@
     } else base.set(input);
 
     if (sharp > 0) {
-      const amount = sharp * 1.35;
+      const amount = sharp * 2.8;
       for(let y=0;y<h;y++) for(let x=0;x<w;x++){
         const i=(y*w+x)*4;
         for(let c=0;c<3;c++){
@@ -104,7 +104,7 @@
         if (thisRender !== renderId) return;
         const result = processPixels(originalData, originalCanvas.width, originalCanvas.height);
         if (thisRender !== renderId) return;
-        resultCtx.putImageData(result,0,0);
+        resultCtx.putImageData(compareOff ? originalData : result,0,0);
         $('resultCanvas').style.visibility = 'visible';
         $('resultCanvas').style.opacity = '1';
         $('busy').hidden = true;
@@ -123,7 +123,7 @@
   $('compareButton').addEventListener('click',()=>{
     compareOff=!compareOff;
     $('compareButton').textContent=compareOff?'補正を再表示':'補正を一時オフ';
-    if(compareOff){clearTimeout(renderTimer);if(originalData)resultCtx.putImageData(originalData,0,0);$('resultCanvas').style.visibility='visible';$('busy').hidden=true;status('補正を一時オフ（元画像を表示）')}
+    if(compareOff){clearTimeout(renderTimer);renderId++;if(originalData)resultCtx.putImageData(originalData,0,0);$('resultCanvas').style.visibility='visible';$('resultCanvas').style.opacity='1';$('originalCanvas').style.opacity='1';$('originalCanvas').style.clipPath='none';$('busy').hidden=true;status('補正を一時オフ（補正後欄にも元画像を表示）')}
     else render();
   });
   $('resetButton').addEventListener('click',()=>{ $('sharpness').value=35;$('denoise').value=10;$('compression').value=8;$('smooth').value=0;render(); });
@@ -150,7 +150,7 @@
     if(kind==='noise'){
       ctx.fillStyle='#d8a8c0';ctx.fillRect(55,55,610,330);
       for(let y=55;y<385;y+=2)for(let x=55;x<665;x+=2){
-        const v=Math.random()*255;ctx.fillStyle='rgba('+Math.round(v)+','+Math.round(v*.75)+','+Math.round(v)+',.55)';ctx.fillRect(x,y,2,2);
+        const v=Math.random()*255;ctx.fillStyle='rgb('+Math.round(v)+','+Math.round(v*.75)+','+Math.round(v)+')';ctx.fillRect(x,y,2,2);
       }
       ctx.fillStyle='#56364a';ctx.font='bold 38px sans-serif';ctx.fillText('NOISE TEST',180,235);
     } else if(kind==='blur') {
@@ -169,7 +169,15 @@
   document.querySelectorAll('[data-sample]').forEach(b=>b.addEventListener('click',()=>sampleImage(b.dataset.sample)));
   $('normalMode').addEventListener('click',()=>{aiMode=false;$('normalMode').classList.add('active');$('aiMode').classList.remove('active');status('通常補正モード')});
   $('aiMode').addEventListener('click',()=>{aiMode=true;$('aiMode').classList.add('active');$('normalMode').classList.remove('active');status('AI補正は準備中：モデル未接続です');alert('AI補正モードはUIのみの試作です。AIモデルはまだ接続されていないため、画像補正は実行しません。通常補正はそのまま利用できます。')});
-  $('compareSlider').addEventListener('input',e=>{const pct=Number(e.target.value);$('compareValue').textContent=pct+'%';$('originalCanvas').style.opacity=String(pct/100);$('resultCanvas').style.opacity=String(1-pct/100);});
+
+  $('compareSlider').addEventListener('input',e=>{
+    const pct=Number(e.target.value);
+    $('compareValue').textContent=pct+'% 補正前';
+    // The slider changes the visible width of the original canvas, not transparency.
+    $('originalCanvas').style.clipPath='inset(0 '+(100-pct)+'% 0 0)';
+    $('originalCanvas').style.opacity='1';
+    $('resultCanvas').style.opacity='1';
+  });
 
   const dialog=$('helpDialog');
   $('helpOpen').addEventListener('click',()=>dialog.showModal());
